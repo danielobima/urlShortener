@@ -20,12 +20,21 @@ app.get('/', function(req, res) {
 app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
+
+function validURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return !!pattern.test(str);
+}
+
 const shortUrls = {};
 app.post('/api/shortUrl',function(req,res){
   if(req.body.url){
-    if(dns.lookup(req.body.url,(err,addresses)=>{
-      return err;
-    })){
+    if(validURL(req.body.url)){
       let shortUrl = Math.round(Math.random()*100000);
       shortUrls[shortUrl] = req.body.url;
       res.send({"original_url":req.body.url,"short_url":shortUrl});
